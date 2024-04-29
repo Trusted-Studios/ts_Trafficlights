@@ -11,10 +11,12 @@ repository 'https://trusted.tebex.io'
 version '1.0.0'
 
 shared_scripts {
+    'lib/modules/shared/Math.lua',
     'config.lua'
 }
 
 client_scripts {
+    'lib/modules/client/Game.lua',
     'client/main.lua'
 }
 
