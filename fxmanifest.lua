@@ -17,7 +17,8 @@ shared_scripts {
 
 client_scripts {
     'lib/modules/client/Game.lua',
-    'client/main.lua'
+    'client/main.lua',
+    'client/components/*.lua',
 }
 
 server_scripts {

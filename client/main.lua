@@ -122,6 +122,11 @@ function Trafficlight:MoveAI(lightCoords)
 
     for i = 1, #vehicles do
         local aiVehicle <const> = vehicles[i]
+
+        if IsEntityAMissionEntity(aiVehicle) then
+            goto continue
+        end
+
         local aiVehiclePos <const> = GetEntityCoords(aiVehicle)
         local aiVehicleHeading <const> = GetEntityHeading(aiVehicle)
         local aiVehicleDriver <const> = GetPedInVehicleSeat(aiVehicle, -1)
@@ -149,6 +154,8 @@ function Trafficlight:MoveAI(lightCoords)
                 end)
             end
         end
+        
+        ::continue::
     end
 end
 
