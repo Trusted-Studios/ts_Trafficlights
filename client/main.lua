@@ -130,35 +130,24 @@ function Trafficlight:MoveAI(lightCoords)
         local aiVehiclePos <const> = GetEntityCoords(aiVehicle)
         local aiVehicleHeading <const> = GetEntityHeading(aiVehicle)
         local aiVehicleDriver <const> = GetPedInVehicleSeat(aiVehicle, -1)
+
         Wait(10)
         ---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
         if aiVehicle ~= vehicle and Vdist(aiVehiclePos, pos) < 50.0 then
             local headingDiff <const> = Math.Round(math.abs(heading - aiVehicleHeading))
             if headingDiff < 25.0 or headingDiff > (360.0 - 25.0) then
-                TaskVehicleDriveToCoord(
-                    aiVehicleDriver,
-                    aiVehicle,
-                    lightCoords.x,
-                    lightCoords.y,
-                    lightCoords.z,
-                    20.0,
-                    -1,
-                    GetEntityModel(aiVehicle),
-                    259,
-                    18.0,
-                    1
-                )
-
+                TaskVehicleDriveToCoord(aiVehicleDriver, aiVehicle, lightCoords.x, lightCoords.y, lightCoords.z, 20.0, -1, GetEntityModel(aiVehicle), 259, 18.0, 1)
                 SetTimeout(1800, function()
                     ClearPedTasks(aiVehicleDriver)
                 end)
             end
         end
-        
+
         ::continue::
     end
 end
 
+---@todo: change to pass trigger coords.
 function Trafficlight:GetVehiclesInRange(ped)
     local nearbyVehicles <const> = {}
     local vehicles <const> = GetGamePool('CVehicle')
@@ -197,9 +186,9 @@ RegisterNetEvent('Trusted:Trafficlights:timeout', function()
     end)
 end)
 
-CreateThread(function()
-    while true do
-        Trafficlight:Main()
-        Wait(0)
-    end
-end)
+-- CreateThread(function()
+--     while true do
+--         Trafficlight:Main()
+--         Wait(0)
+--     end
+-- end)

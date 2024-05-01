@@ -22,21 +22,24 @@ LightSearch = {
         GetHashKey("prop_traffic_03a"),
         GetHashKey("prop_traffic_03b"),
     },
+    hashIndexList = {
+        [GetHashKey("prop_traffic_01a")] = true,
+        [GetHashKey("prop_traffic_01b")] = true,
+        [GetHashKey("prop_traffic_01d")] = true,
+        [GetHashKey("prop_traffic_02a")] = true,
+        [GetHashKey("prop_traffic_02b")] = true,
+        [GetHashKey("prop_traffic_03a")] = true,
+        [GetHashKey("prop_traffic_03b")] = true,
+    }
 }
 
 ---@param centerCoords any
 ---@param lightCoords any
+---@return vector4
 function LightSearch:GetIntersectionCenter(centerCoords, lightCoords)
     local distance <const> = #(lightCoords - centerCoords)
-    local intersectionCenter <const> = Math.GetForwardFromCoords(centerCoords, distance / 2, 'front')
 
-    local x, y, z = table.unpack(intersectionCenter)
-    CreateThread(function()
-        while true do
-            Wait(0)
-            Game.AddMarker(x, y, z + 1)
-        end
-    end)
+    return Math.GetForwardFromCoords(centerCoords, distance / 2, 'front')
 end
 
 --- Searches the road center using the given coords and heading.
@@ -52,35 +55,10 @@ function LightSearch:GetRoadCenter(coords, heading)
         return
     end
 
-    print(#(rRoadBoundary - lRoadBoundary))
-
     if #(lRoadBoundary - rRoadBoundary) < 1.0 then
         print("^1[WARNING]^0 - Road boundaries are too close.")
         lRoadBoundary = Math.GetForwardFromCoords(vec4(rRoadBoundary.x, rRoadBoundary.y, rRoadBoundary.z, heading), 20.0, 'left')
     end
-
-    CreateThread(function()
-        local x, y, z = table.unpack(rRoadBoundary)
-        while true do
-            Wait(0)
-            Game.AddMarker(x, y, z + 1)
-        end
-    end)
-
-    CreateThread(function()
-        local x, y, z = table.unpack(lRoadBoundary)
-        while true do
-            Wait(0)
-            Game.AddMarker(x, y, z + 1)
-        end
-    end)
-
-    CreateThread(function()
-        while true do
-            Wait(0)
-            DrawLine(rRoadBoundary.x, rRoadBoundary.y, rRoadBoundary.z + 3, lRoadBoundary.x, lRoadBoundary.y, lRoadBoundary.z + 3, 255, 0, 0, 255)
-        end
-    end)
 
     local center = vec4(
         (rRoadBoundary.x + lRoadBoundary.x) / 2,
@@ -104,13 +82,12 @@ function LightSearch:GetFarFrontLight(coords, heading)
     for searchDistance = 65, 15, -10 do
         searchPosition = Math.GetOffsetPositionByAngle(coords, heading, searchDistance)
         for i = 1, #self.hash do
-            targetLight = GetClosestObjectOfType(searchPosition.x, searchPosition.y, searchPosition.z, 10.0, self.hash[i], false, false, false)
+            targetLight = GetClosestObjectOfType(searchPosition.x, searchPosition.y, searchPosition.z, 15.0, self.hash[i], false, false, false)
 
             if targetLight ~= 0 then
                 local targetLightHeading <const> = GetEntityHeading(targetLight)
-                local headingDiff <const> = Math.Round(math.abs(heading - targetLightHeading))
 
-                if not (headingDiff < 25.0 or headingDiff > (360.0 - 25.0)) then
+                if not LightSearch:IsHeadingInRange(heading, targetLightHeading, 25.0) then
                     goto continue
                 end
 
@@ -137,22 +114,58 @@ function LightSearch:GetFarFrontLight(coords, heading)
     end
 
     local x, y, z = table.unpack(GetEntityCoords(targetLight))
-    CreateThread(function()
-        while true do
-            Wait(0)
-            Game.AddMarker(x, y, z + 1)
-        end
-    end)
 
     return targetLight, foundHash, vec4(x, y, z, heading)
 end
 
--- CreateThread(function()
---     local coords = GetEntityCoords(PlayerPedId())
---     local heading = GetEntityHeading(PlayerPedId())
+function LightSearch:GetLightsInRange(coords)
+    local nearbyLights <const> = {}
+    local entities <const> = GetGamePool('CObject')
 
---     local centerCoords = LightSearch:GetRoadCenter(coords, heading)
---     local targetLight, hash, lightCoords = LightSearch:GetFarFrontLight(coords, heading)
+    for _, entity in ipairs(entities) do
 
---     LightSearch:GetIntersectionCenter(centerCoords, lightCoords)
--- end)
+        if not self.hashIndexList[GetEntityModel(entity)] then
+            goto continue
+        end
+
+        local distance <const> = #(vec3(coords.x, coords.y, coords.z) - GetEntityCoords(entity))
+
+        if distance <= 40.0 and LightSearch:IsInHeightRange(GetEntityCoords(entity), coords.z, 2.5) then
+            nearbyLights[#nearbyLights + 1] = entity
+        end
+
+        ::continue::
+    end
+
+    return nearbyLights
+end
+
+function LightSearch:IsHeadingInRange(targetHeading, heading, range)
+    local headingDiff <const> = Math.Round(math.abs(targetHeading - heading))
+    return (headingDiff < range or headingDiff > (360.0 - range))
+end
+
+function LightSearch:IsInHeightRange(coords, height, range)
+    return math.abs(coords.z - height) < range
+end
+
+CreateThread(function()
+    local coords = GetEntityCoords(PlayerPedId())
+    local heading = GetEntityHeading(PlayerPedId())
+
+    local centerCoords = LightSearch:GetRoadCenter(coords, heading)
+    local targetLight, hash, lightCoords = LightSearch:GetFarFrontLight(coords, heading)
+
+    if not targetLight then
+        print('^1[WARNING]^0 - No traffic light found.')
+        return
+    end
+
+    local intersectionCenter = LightSearch:GetIntersectionCenter(centerCoords, lightCoords)
+    local lights = LightSearch:GetLightsInRange(intersectionCenter)
+
+
+    for i = 1, #lights do
+        SetEntityDrawOutline(lights[i], true)
+    end
+end)
