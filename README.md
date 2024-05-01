@@ -1,6 +1,6 @@
 # Trafficlight Control
 
-This scripts is basically an updated version of the [https://forum.cfx.re/t/release-smarttrafficlights-server-side-smart-traffic-lights-v1-00/492770](Smart Trafficlights script), but it solves the problem of sync issues and AI not driving when the lights turn green.
+This scripts is basically an updated version of the [Smart Trafficlights script](https://forum.cfx.re/t/release-smarttrafficlights-server-side-smart-traffic-lights-v1-00/492770), but it solves the problem of sync issues and AI not driving when the lights turn green.
 
 ## Features:
 - Set the waiting time until a light turns green.
