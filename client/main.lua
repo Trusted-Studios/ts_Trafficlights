@@ -77,64 +77,28 @@ function Trafficlight:Handle(vehicle)
     local lights <const> = LightSearch:GetLightsInRange(intersectionCenter)
 
     for i = 1, #lights do
-        SetEntityDrawOutline(lights[i].enttiy, true)
+        SetEntityDrawOutline(lights[i].entity, true)
     end
 
-    -- self.lightFound = true
-    -- SetTimeout(8000, function()
-    --     Trafficlight.lightFound = false
-    -- end)
+    self.lightFound = true
+    SetTimeout(8000, function()
+        self.lightFound = false
+    end)
 
-    -- Wait(Config.RedLightDurationWhileWaiting)
-    -- TriggerServerEvent('Trusted:Trafficlights:SyncChange', lightCoords, hash)
+    TriggerServerEvent('Trusted:Trafficlights:SyncChange', heading, lights, intersectionCenter, targetLight)
 end
 
---- Handles AI to drive when lights turn green.
----@param lightCoords vector3
-function Trafficlight:MoveAI(lightCoords)
-    local ped <const> = PlayerPedId()
-    local vehicles <const> = Trafficlight:GetVehiclesInRange(ped)
-    local vehicle <const> = GetVehiclePedIsIn(ped, false)
-    local pos <const> = GetEntityCoords(vehicle)
-    local heading <const> = GetEntityHeading(vehicle)
-
-    for i = 1, #vehicles do
-        local aiVehicle <const> = vehicles[i]
-
-        if IsEntityAMissionEntity(aiVehicle) then
-            goto continue
-        end
-
-        local aiVehiclePos <const> = GetEntityCoords(aiVehicle)
-        local aiVehicleHeading <const> = GetEntityHeading(aiVehicle)
-        local aiVehicleDriver <const> = GetPedInVehicleSeat(aiVehicle, -1)
-
-        Wait(10)
-        ---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
-        if aiVehicle ~= vehicle and Vdist(aiVehiclePos, pos) < 50.0 then
-            local headingDiff <const> = Math.Round(math.abs(heading - aiVehicleHeading))
-            if headingDiff < 25.0 or headingDiff > (360.0 - 25.0) then
-                TaskVehicleDriveToCoord(aiVehicleDriver, aiVehicle, lightCoords.x, lightCoords.y, lightCoords.z, 20.0, -1, GetEntityModel(aiVehicle), 259, 18.0, 1)
-                SetTimeout(1800, function()
-                    ClearPedTasks(aiVehicleDriver)
-                end)
-            end
-        end
-
-        ::continue::
-    end
-end
-
----@todo: change to pass trigger coords.
-function Trafficlight:GetVehiclesInRange(ped)
+---@param coords vector3
+---@param range number
+---@return table
+function Trafficlight:GetVehiclesInRange(coords, range)
     local nearbyVehicles <const> = {}
     local vehicles <const> = GetGamePool('CVehicle')
-    local pos <const> = GetEntityCoords(ped)
 
     for _, vehicle in ipairs(vehicles) do
-        local distance = #(pos - GetEntityCoords(vehicle))
+        local distance = #(coords - GetEntityCoords(vehicle))
 
-        if distance <= 35.0 then
+        if distance <= range then
             nearbyVehicles[#nearbyVehicles + 1] = vehicle
         end
     end
@@ -142,19 +106,59 @@ function Trafficlight:GetVehiclesInRange(ped)
     return nearbyVehicles
 end
 
---- changes the entity light state for everyone.
----@param lightCoords vector3
-RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(lightCoords, hash)
-    local targetLight <const> = GetClosestObjectOfType(lightCoords.x, lightCoords.y, lightCoords.z, 2.0, hash, false, false, false)
-    SetEntityTrafficlightOverride(targetLight, 0)
-    print('changing light state to green.')
+--- changes the intersection light states.
+---@param frontLights CTrafficlights[]
+---@param parallelLights CTrafficlights[]
+---@param otherLights CTrafficlights[]
+RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(frontLights, parallelLights, otherLights)
+    local lights <const> = {}
 
-    Trafficlight:MoveAI(lightCoords)
+    for i = 1, #otherLights do
+        CreateThread(function()
+            local targetLight <const> = GetClosestObjectOfType(otherLights[i].coords.x, otherLights[i].coords.y, otherLights[i].coords.z, 2.0, otherLights[i].hash, false, false, false)
+            lights[#lights + 1] = targetLight
+
+            SetEntityTrafficlightOverride(targetLight, 2)
+            Wait(1500)
+            SetEntityTrafficlightOverride(targetLight, 1)
+        end)
+    end
+
+    Wait(Config.RedLightDurationWhileWaiting)
+
+    for i = 1, #frontLights do
+        local targetLight <const> = GetClosestObjectOfType(frontLights[i].coords.x, frontLights[i].coords.y, frontLights[i].coords.z, 2.0, frontLights[i].hash, false, false, false)
+        lights[#lights + 1] = targetLight
+
+        SetEntityTrafficlightOverride(targetLight, 0)
+    end
+
+    for i = 1, #parallelLights do
+        local targetLight <const> = GetClosestObjectOfType(parallelLights[i].coords.x, parallelLights[i].coords.y, parallelLights[i].coords.z, 2.0, parallelLights[i].hash, false, false, false)
+        lights[#lights + 1] = targetLight
+
+        SetEntityTrafficlightOverride(targetLight, 0)
+    end
+
     Wait(8000)
 
-    SetEntityTrafficlightOverride(targetLight, 2)
-    Wait(1000)
-    SetEntityTrafficlightOverride(targetLight, 3)
+    for i = 1, #lights do
+        SetEntityTrafficlightOverride(lights[i], -1)
+    end
+end)
+
+--- Handles AI to drive when lights turn green.
+---@param otherLights CTrafficlights[]
+---@param intersectionCenter vector4
+RegisterNetEvent('Trusted:Trafficlights:HandleAI', function(otherLights, targetLight, intersectionCenter)
+    local pVehicle <const> = GetVehiclePedIsIn(PlayerPedId(), false)
+
+    for i = 1, #otherLights do
+        AI:StopAtRedLight(pVehicle, otherLights[i], intersectionCenter)
+    end
+
+    Wait(Config.RedLightDurationWhileWaiting)
+    AI:ForceDriveAtGreenLight(pVehicle, targetLight, intersectionCenter)
 end)
 
 RegisterNetEvent('Trusted:Trafficlights:timeout', function()
@@ -164,9 +168,9 @@ RegisterNetEvent('Trusted:Trafficlights:timeout', function()
     end)
 end)
 
--- CreateThread(function()
---     while true do
---         Trafficlight:Main()
---         Wait(0)
---     end
--- end)
+CreateThread(function()
+    while true do
+        Trafficlight:Main()
+        Wait(0)
+    end
+end)

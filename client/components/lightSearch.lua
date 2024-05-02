@@ -118,6 +118,8 @@ function LightSearch:GetFarFrontLight(coords, heading)
     return targetLight, foundHash, vec4(x, y, z, heading)
 end
 
+---@param coords vector3
+---@return CTrafficlights[]
 function LightSearch:GetLightsInRange(coords)
     local nearbyLights <const> = {}
     local entities <const> = GetGamePool('CObject')
@@ -135,7 +137,8 @@ function LightSearch:GetLightsInRange(coords)
             nearbyLights[#nearbyLights + 1] = {
                 entity = entity,
                 coords = lightCoords,
-                hash = GetEntityModel(entity)
+                hash = GetEntityModel(entity),
+                heading = GetEntityHeading(entity)
             }
         end
 
@@ -145,11 +148,20 @@ function LightSearch:GetLightsInRange(coords)
     return nearbyLights
 end
 
+---@todo? move to math lib
+---@param targetHeading number
+---@param heading number
+---@param range number
+---@return boolean
 function LightSearch:IsHeadingInRange(targetHeading, heading, range)
     local headingDiff <const> = Math.Round(math.abs(targetHeading - heading))
     return (headingDiff < range or headingDiff > (360.0 - range))
 end
 
+---@param coords vector3
+---@param height number
+---@param range number
+---@return boolean
 function LightSearch:IsInHeightRange(coords, height, range)
     return math.abs(coords.z - height) < range
 end

@@ -1,0 +1,5 @@
+---@class CTrafficlights
+---@field entity number
+---@field coords vector3
+---@field hash number
+---@field heading number
