@@ -61,54 +61,32 @@ end
 --- Handles object search and state sync.
 ---@param vehicle number
 function Trafficlight:Handle(vehicle)
-    local pos <const> = GetEntityCoords(vehicle)
+    local coords <const> = GetEntityCoords(vehicle)
     local heading <const> = GetEntityHeading(vehicle)
-    local targetLight = 0
-    local searchPosition = vector3(0.0, 0.0, 0.0)
-    local foundHash = -1
-    for searchDistance = 65, 5, -10 do
-        searchPosition = Math.GetOffsetPositionByAngle(pos, heading, searchDistance)
-        for i = 1, #self.hash do
-            targetLight = GetClosestObjectOfType(searchPosition.x, searchPosition.y, searchPosition.z, 10.0, self.hash[i], false, false, false)
-            if targetLight ~= 0 then
-                local targetLightHeading <const> = GetEntityHeading(targetLight)
-                local headingDiff <const> = Math.Round(math.abs(heading - targetLightHeading))
-                if not (headingDiff < 25.0 or headingDiff > (360.0 - 25.0)) then
-                    targetLight = 0
-                end
 
-                -- if Trusted.Debug then
-                    if targetLight ~= 0 then
-                        SetEntityDrawOutline(targetLight, true)
-                        SetTimeout(10000, function()
-                            SetEntityDrawOutline(targetLight, false)
-                        end)
-                        foundHash = self.hash[i]
-                    end
-                -- end
+    local centerCoords <const> = LightSearch:GetRoadCenter(coords, heading)
+    local targetLight <const>, hash <const>, lightCoords <const> = LightSearch:GetFarFrontLight(coords, heading)
 
-                break
-            end
-        end
-
-        if targetLight ~= 0 then
-            break
-        end
-    end
-
-    if targetLight ~= 0 then
-        self.lightFound = true
-        SetTimeout(8000, function()
-            Trafficlight.lightFound = false
-        end)
-
-        Wait(Config.RedLightDurationWhileWaiting)
-        local lightCoords <const> = GetEntityCoords(targetLight)
-        TriggerServerEvent('Trusted:Trafficlights:SyncChange', lightCoords, foundHash)
+    if not targetLight then
+        print('^1[WARNING]^0 - No front trafficlight found.')
+        self.noLightInArea = true
         return
     end
 
-    self.noLightInArea = true
+    local intersectionCenter <const> = LightSearch:GetIntersectionCenter(centerCoords, lightCoords)
+    local lights <const> = LightSearch:GetLightsInRange(intersectionCenter)
+
+    for i = 1, #lights do
+        SetEntityDrawOutline(lights[i].enttiy, true)
+    end
+
+    -- self.lightFound = true
+    -- SetTimeout(8000, function()
+    --     Trafficlight.lightFound = false
+    -- end)
+
+    -- Wait(Config.RedLightDurationWhileWaiting)
+    -- TriggerServerEvent('Trusted:Trafficlights:SyncChange', lightCoords, hash)
 end
 
 --- Handles AI to drive when lights turn green.

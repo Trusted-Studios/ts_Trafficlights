@@ -128,10 +128,15 @@ function LightSearch:GetLightsInRange(coords)
             goto continue
         end
 
-        local distance <const> = #(vec3(coords.x, coords.y, coords.z) - GetEntityCoords(entity))
+        local lightCoords <const> = GetEntityCoords(entity)
+        local distance <const> = #(vec3(coords.x, coords.y, coords.z) - lightCoords)
 
-        if distance <= 40.0 and LightSearch:IsInHeightRange(GetEntityCoords(entity), coords.z, 2.5) then
-            nearbyLights[#nearbyLights + 1] = entity
+        if distance <= 40.0 and LightSearch:IsInHeightRange(lightCoords, coords.z, 2.5) then
+            nearbyLights[#nearbyLights + 1] = {
+                entity = entity,
+                coords = lightCoords,
+                hash = GetEntityModel(entity)
+            }
         end
 
         ::continue::
@@ -148,24 +153,3 @@ end
 function LightSearch:IsInHeightRange(coords, height, range)
     return math.abs(coords.z - height) < range
 end
-
-CreateThread(function()
-    local coords = GetEntityCoords(PlayerPedId())
-    local heading = GetEntityHeading(PlayerPedId())
-
-    local centerCoords = LightSearch:GetRoadCenter(coords, heading)
-    local targetLight, hash, lightCoords = LightSearch:GetFarFrontLight(coords, heading)
-
-    if not targetLight then
-        print('^1[WARNING]^0 - No traffic light found.')
-        return
-    end
-
-    local intersectionCenter = LightSearch:GetIntersectionCenter(centerCoords, lightCoords)
-    local lights = LightSearch:GetLightsInRange(intersectionCenter)
-
-
-    for i = 1, #lights do
-        SetEntityDrawOutline(lights[i], true)
-    end
-end)
