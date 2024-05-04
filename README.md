@@ -6,7 +6,7 @@
     </a>
 </p>
 
-# Trafficlight Control
+# Trafficlight Control (Beta)
 
 This scripts is basically an updated version of the [Smart Trafficlights script](https://forum.cfx.re/t/release-smarttrafficlights-server-side-smart-traffic-lights-v1-00/492770), but it solves the problem of sync issues and AI not driving when the lights turn green.
 
