@@ -18,7 +18,7 @@ local cachedLights = {}
 ---@param lights CTrafficlights[]
 ---@param intersectionCenter vector3
 ---@param targetLight number
-RegisterNetEvent('Trusted:Trafficlights:SyncChange', function(triggerHeading, lights, intersectionCenter, targetLight)
+RegisterNetEvent('Trusted:Trafficlights:SyncChange', function(triggerCoords, triggerHeading, lights, intersectionCenter, targetLight)
 
     --> check if lights are cached
     for i = 1, #lights do
@@ -61,7 +61,7 @@ RegisterNetEvent('Trusted:Trafficlights:SyncChange', function(triggerHeading, li
     end
 
     TriggerClientEvent('Trusted:Trafficlights:SyncChange', -1, frontLights, parallelLights, otherLights)
-    TriggerClientEvent('Trusted:Trafficlights:HandleAI', source, otherLights, targetLight, intersectionCenter)
+    TriggerClientEvent('Trusted:Trafficlights:HandleAI', source, triggerCoords, triggerHeading, otherLights, targetLight, intersectionCenter)
 end)
 
 ---@param targetHeading number

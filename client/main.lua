@@ -65,10 +65,12 @@ function Trafficlight:Handle(vehicle)
     local heading <const> = GetEntityHeading(vehicle)
 
     local centerCoords <const> = LightSearch:GetRoadCenter(coords, heading)
-    local targetLight <const>, hash <const>, lightCoords <const> = LightSearch:GetFarFrontLight(coords, heading)
+    local targetLight <const>, lightCoords <const> = LightSearch:GetFarFrontLight(coords, heading)
 
     if not targetLight then
-        print('^1[WARNING]^0 - No front trafficlight found.')
+        if Trusted.Debug then
+            print('^1[WARNING]^0 - No front trafficlight found.')
+        end
         self.noLightInArea = true
         return
     end
@@ -76,8 +78,10 @@ function Trafficlight:Handle(vehicle)
     local intersectionCenter <const> = LightSearch:GetIntersectionCenter(centerCoords, lightCoords)
     local lights <const> = LightSearch:GetLightsInRange(intersectionCenter)
 
-    for i = 1, #lights do
-        SetEntityDrawOutline(lights[i].entity, true)
+    if Trusted.Debug then
+        for i = 1, #lights do
+            SetEntityDrawOutline(lights[i].entity, true)
+        end
     end
 
     self.lightFound = true
@@ -85,7 +89,7 @@ function Trafficlight:Handle(vehicle)
         self.lightFound = false
     end)
 
-    TriggerServerEvent('Trusted:Trafficlights:SyncChange', heading, lights, intersectionCenter, targetLight)
+    TriggerServerEvent('Trusted:Trafficlights:SyncChange', coords, heading, lights, intersectionCenter, targetLight)
 end
 
 ---@param coords vector3
@@ -150,7 +154,7 @@ end)
 --- Handles AI to drive when lights turn green.
 ---@param otherLights CTrafficlights[]
 ---@param intersectionCenter vector4
-RegisterNetEvent('Trusted:Trafficlights:HandleAI', function(otherLights, targetLight, intersectionCenter)
+RegisterNetEvent('Trusted:Trafficlights:HandleAI', function(coords, heading, otherLights, targetLight, intersectionCenter)
     local pVehicle <const> = GetVehiclePedIsIn(PlayerPedId(), false)
 
     for i = 1, #otherLights do
@@ -158,7 +162,7 @@ RegisterNetEvent('Trusted:Trafficlights:HandleAI', function(otherLights, targetL
     end
 
     Wait(Config.RedLightDurationWhileWaiting)
-    AI:ForceDriveAtGreenLight(pVehicle, targetLight, intersectionCenter)
+    AI:ForceDriveAtGreenLight(coords, heading, pVehicle, targetLight, intersectionCenter)
 end)
 
 RegisterNetEvent('Trusted:Trafficlights:timeout', function()

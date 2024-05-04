@@ -39,13 +39,11 @@ function AI:StopAtRedLight(pVehicle, light, intersectionCenter)
         end
 
         CreateThread(function()
-            TaskVehicleTempAction(GetPedInVehicleSeat(aiVehicle, -1), aiVehicle, 6, 1500)
-            Wait(1500)
-
-            FreezeEntityPosition(aiVehicle, true)
+            local x, y, z = table.unpack(GetEntityCoords(aiVehicle))
+            local speedZone <const> = AddSpeedZoneForCoord(x, y, z, 5.0, 0.0, false)
 
             SetTimeout(12000, function()
-                FreezeEntityPosition(aiVehicle, false)
+                RemoveSpeedZone(speedZone)
             end)
         end)
 
@@ -56,9 +54,7 @@ end
 ---@param pVehicle number
 ---@param light number
 ---@param intersectionCenter vector4
-function AI:ForceDriveAtGreenLight(pVehicle, light, intersectionCenter)
-    local pVehicleCoords <const> = GetEntityCoords(pVehicle)
-    local pVehicleHeading <const> = GetEntityHeading(pVehicle)
+function AI:ForceDriveAtGreenLight(pVehicleCoords, pVehicleHeading, pVehicle, light, intersectionCenter)
     local lightCoords <const> = GetEntityCoords(light)
     local searchPoint <const> = Math.GetForwardFromCoords(vec4(lightCoords.x, lightCoords.y, lightCoords.z, GetEntityHeading(light)), 18.0, 'left')
     local vehicles <const> = Trafficlight:GetVehiclesInRange(pVehicleCoords, 35.0)
@@ -94,10 +90,12 @@ function AI:HandleDriveAtGreenLight(pVehicle, pVehicleHeading, pVehicleCoords, i
         local driveDistance <const> = #(vec3(intersectionCenter.x, intersectionCenter.y, intersectionCenter.z) - aiPosition)
         local targetCoords <const> = Math.GetForwardFromCoords(vec4(aiPosition.x, aiPosition.y, aiPosition.z, aiHeading), driveDistance)
 
-        SetEntityDrawOutline(aiVehicle, true)
-        SetTimeout(4000, function()
-            SetEntityDrawOutline(aiVehicle, false)
-        end)
+        if Trusted.Debug then
+            SetEntityDrawOutline(aiVehicle, true)
+            SetTimeout(4000, function()
+                SetEntityDrawOutline(aiVehicle, false)
+            end)
+        end
 
         TaskVehicleDriveToCoord(aiDriver, aiVehicle, targetCoords.x, targetCoords.y, targetCoords.z, 15.0, -1, GetEntityModel(aiVehicle), 259, 7.0, 1)
         Wait(1500)

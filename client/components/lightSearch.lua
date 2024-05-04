@@ -51,12 +51,16 @@ function LightSearch:GetRoadCenter(coords, heading)
     local lExists, lRoadBoundary = GetRoadBoundaryUsingHeading(coords.x, coords.y, coords.z, heading + 180.0)
 
     if not rExists or not lExists then
-        print('^1[WARNING]^0 - Unable to find road boundaries.')
+        if Trusted.Debug then
+            print('^1[WARNING]^0 - Unable to find road boundaries.')
+        end
         return
     end
 
     if #(lRoadBoundary - rRoadBoundary) < 1.0 then
-        print("^1[WARNING]^0 - Road boundaries are too close.")
+        if Trusted.Debug then
+            print("^1[WARNING]^0 - Road boundaries are too close.")
+        end
         lRoadBoundary = Math.GetForwardFromCoords(vec4(rRoadBoundary.x, rRoadBoundary.y, rRoadBoundary.z, heading), 20.0, 'left')
     end
 
@@ -73,10 +77,9 @@ end
 --- Searches the farthest traffic light in front of the vehicle.
 ---@param coords vector3
 ---@param heading number
----@return number?, number?, vector4?
+---@return number?, vector4?
 function LightSearch:GetFarFrontLight(coords, heading)
     local targetLight = 0
-    local foundHash = -1
     local searchPosition = vec3(0.0, 0.0, 0.0)
 
     for searchDistance = 65, 15, -10 do
@@ -91,12 +94,12 @@ function LightSearch:GetFarFrontLight(coords, heading)
                     goto continue
                 end
 
-                SetEntityDrawOutline(targetLight, true)
-                SetTimeout(8000, function()
-                    SetEntityDrawOutline(targetLight, false)
-                end)
-
-                foundHash = self.hash[i]
+                if Trusted.Debug then
+                    SetEntityDrawOutline(targetLight, true)
+                    SetTimeout(8000, function()
+                        SetEntityDrawOutline(targetLight, false)
+                    end)
+                end
 
                 break
             end
@@ -115,7 +118,7 @@ function LightSearch:GetFarFrontLight(coords, heading)
 
     local x, y, z = table.unpack(GetEntityCoords(targetLight))
 
-    return targetLight, foundHash, vec4(x, y, z, heading)
+    return targetLight, vec4(x, y, z, heading)
 end
 
 ---@param coords vector3
