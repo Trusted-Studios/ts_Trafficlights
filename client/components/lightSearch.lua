@@ -85,7 +85,8 @@ function LightSearch:GetFarFrontLight(coords, heading)
     for searchDistance = 65, 15, -10 do
         searchPosition = Math.GetOffsetPositionByAngle(coords, heading, searchDistance)
         for i = 1, #self.hash do
-            targetLight = GetClosestObjectOfType(searchPosition.x, searchPosition.y, searchPosition.z, 15.0, self.hash[i], false, false, false)
+            local x, y, z = table.unpack(searchPosition)
+            targetLight = GetClosestObjectOfType(x, y, z, 15.0, self.hash[i], false, false, false)
 
             if targetLight ~= 0 then
                 local targetLightHeading <const> = GetEntityHeading(targetLight)

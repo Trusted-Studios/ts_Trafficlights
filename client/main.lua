@@ -119,7 +119,8 @@ RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(frontLights, parall
 
     for i = 1, #otherLights do
         CreateThread(function()
-            local targetLight <const> = GetClosestObjectOfType(otherLights[i].coords.x, otherLights[i].coords.y, otherLights[i].coords.z, 2.0, otherLights[i].hash, false, false, false)
+            local x, y, z = table.unpack(otherLights[i].coords)
+            local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, otherLights[i].hash, false, false, false)
             lights[#lights + 1] = targetLight
 
             SetEntityTrafficlightOverride(targetLight, 2)
@@ -131,14 +132,16 @@ RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(frontLights, parall
     Wait(Config.RedLightDurationWhileWaiting)
 
     for i = 1, #frontLights do
-        local targetLight <const> = GetClosestObjectOfType(frontLights[i].coords.x, frontLights[i].coords.y, frontLights[i].coords.z, 2.0, frontLights[i].hash, false, false, false)
+        local x, y, z = table.unpack(frontLights[i].coords)
+        local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, frontLights[i].hash, false, false, false)
         lights[#lights + 1] = targetLight
 
         SetEntityTrafficlightOverride(targetLight, 0)
     end
 
     for i = 1, #parallelLights do
-        local targetLight <const> = GetClosestObjectOfType(parallelLights[i].coords.x, parallelLights[i].coords.y, parallelLights[i].coords.z, 2.0, parallelLights[i].hash, false, false, false)
+        local x, y, z = table.unpack(parallelLights[i].coords)
+        local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, parallelLights[i].hash, false, false, false)
         lights[#lights + 1] = targetLight
 
         SetEntityTrafficlightOverride(targetLight, 0)
