@@ -33,8 +33,8 @@ LightSearch = {
     }
 }
 
----@param centerCoords any
----@param lightCoords any
+---@param centerCoords vector4
+---@param lightCoords vector4
 ---@return vector4
 function LightSearch:GetIntersectionCenter(centerCoords, lightCoords)
     local distance <const> = #(lightCoords - centerCoords)
@@ -61,7 +61,7 @@ function LightSearch:GetRoadCenter(coords, heading)
         if Trusted.Debug then
             print("^1[WARNING]^0 - Road boundaries are too close.")
         end
-        lRoadBoundary = Math.GetForwardFromCoords(vec4(rRoadBoundary.x, rRoadBoundary.y, rRoadBoundary.z, heading), 20.0, 'left')
+        lRoadBoundary = Math.GetForwardFromCoords(Math.Vec3ToVec4(rRoadBoundary, heading), 20.0, 'left')
     end
 
     local center = vec4(
@@ -123,7 +123,7 @@ function LightSearch:GetFarFrontLight(coords, heading)
 end
 
 ---@param coords vector3
----@return CTrafficlights[]
+---@return CTrafficlight[]
 function LightSearch:GetLightsInRange(coords)
     local nearbyLights <const> = {}
     local entities <const> = GetGamePool('CObject')
@@ -135,7 +135,7 @@ function LightSearch:GetLightsInRange(coords)
         end
 
         local lightCoords <const> = GetEntityCoords(entity)
-        local distance <const> = #(vec3(coords.x, coords.y, coords.z) - lightCoords)
+        local distance <const> = #(coords - lightCoords)
 
         if distance <= 40.0 and LightSearch:IsInHeightRange(lightCoords, coords.z, 2.5) then
             nearbyLights[#nearbyLights + 1] = {
@@ -162,6 +162,7 @@ function LightSearch:IsHeadingInRange(targetHeading, heading, range)
     return (headingDiff < range or headingDiff > (360.0 - range))
 end
 
+---@todo? move to math lib
 ---@param coords vector3
 ---@param height number
 ---@param range number

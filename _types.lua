@@ -1,4 +1,4 @@
----@class CTrafficlights
+---@class CTrafficlight
 ---@field entity number
 ---@field coords vector3
 ---@field hash number

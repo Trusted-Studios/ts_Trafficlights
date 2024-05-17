@@ -13,16 +13,6 @@ print("^6[CLIENT - DEBUG] ^0: "..filename()..".lua gestartet");
 -- ════════════════════════════════════════════════════════════════════════════════════ --
 
 Trafficlight = {
-    hash = {
-        GetHashKey("prop_traffic_01a"),
-        GetHashKey("prop_traffic_01b"),
-        GetHashKey("prop_traffic_01d"),
-        GetHashKey("prop_traffic_02a"),
-        GetHashKey("prop_traffic_02b"),
-        GetHashKey("prop_traffic_03a"),
-        GetHashKey("prop_traffic_03b"),
-    },
-    lastTargetLight = -1,
     lightFound = false,
     noLightInArea = false
 }
@@ -64,8 +54,8 @@ function Trafficlight:Handle(vehicle)
     local coords <const> = GetEntityCoords(vehicle)
     local heading <const> = GetEntityHeading(vehicle)
 
-    local centerCoords <const> = LightSearch:GetRoadCenter(coords, heading)
-    local targetLight <const>, lightCoords <const> = LightSearch:GetFarFrontLight(coords, heading)
+    local centerCoords <const> = LightSearch:GetRoadCenter(coords, heading) --[[@as vector4]]
+    local targetLight <const>, lightCoords <const> = LightSearch:GetFarFrontLight(coords, heading) --[[@as vector4]]
 
     if not targetLight then
         if Trusted.Debug then
@@ -76,7 +66,7 @@ function Trafficlight:Handle(vehicle)
     end
 
     local intersectionCenter <const> = LightSearch:GetIntersectionCenter(centerCoords, lightCoords)
-    local lights <const> = LightSearch:GetLightsInRange(intersectionCenter)
+    local lights <const> = LightSearch:GetLightsInRange(Math.Vec4ToVec3(intersectionCenter))
 
     if Trusted.Debug then
         for i = 1, #lights do
@@ -111,9 +101,9 @@ function Trafficlight:GetVehiclesInRange(coords, range)
 end
 
 --- changes the intersection light states.
----@param frontLights CTrafficlights[]
----@param parallelLights CTrafficlights[]
----@param otherLights CTrafficlights[]
+---@param frontLights CTrafficlight[]
+---@param parallelLights CTrafficlight[]
+---@param otherLights CTrafficlight[]
 RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(frontLights, parallelLights, otherLights)
     local lights <const> = {}
 
@@ -155,7 +145,7 @@ RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(frontLights, parall
 end)
 
 --- Handles AI to drive when lights turn green.
----@param otherLights CTrafficlights[]
+---@param otherLights CTrafficlight[]
 ---@param intersectionCenter vector4
 RegisterNetEvent('Trusted:Trafficlights:HandleAI', function(coords, heading, otherLights, targetLight, intersectionCenter)
     local pVehicle <const> = GetVehiclePedIsIn(PlayerPedId(), false)

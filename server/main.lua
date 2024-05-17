@@ -15,7 +15,7 @@ print("^6[SERVER - DEBUG] ^0: "..filename()..".lua gestartet");
 local cachedLights = {}
 
 ---@param triggerHeading number
----@param lights CTrafficlights[]
+---@param lights CTrafficlight[]
 ---@param intersectionCenter vector3
 ---@param targetLight number
 RegisterNetEvent('Trusted:Trafficlights:SyncChange', function(triggerCoords, triggerHeading, lights, intersectionCenter, targetLight)

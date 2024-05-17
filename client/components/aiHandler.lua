@@ -15,7 +15,7 @@ print("^6[CLIENT - DEBUG] ^0: "..filename()..".lua gestartet");
 AI = {}
 
 ---@param pVehicle number
----@param light CTrafficlights
+---@param light CTrafficlight
 ---@param intersectionCenter vector4
 function AI:StopAtRedLight(pVehicle, light, intersectionCenter)
     local vehicles <const> = Trafficlight:GetVehiclesInRange(light.coords, 35.0)
@@ -34,7 +34,7 @@ function AI:StopAtRedLight(pVehicle, light, intersectionCenter)
             goto continue
         end
 
-        if not (#(vec3(intersectionCenter.x, intersectionCenter.y, intersectionCenter.z) - aiCoords) > 5.0) then
+        if not (#(Math.Vec4ToVec3(intersectionCenter) - aiCoords) > 5.0) then
             goto continue
         end
 
@@ -56,9 +56,9 @@ end
 ---@param intersectionCenter vector4
 function AI:ForceDriveAtGreenLight(pVehicleCoords, pVehicleHeading, pVehicle, light, intersectionCenter)
     local lightCoords <const> = GetEntityCoords(light)
-    local searchPoint <const> = Math.GetForwardFromCoords(vec4(lightCoords.x, lightCoords.y, lightCoords.z, GetEntityHeading(light)), 18.0, 'left')
+    local searchPoint <const> = Math.GetForwardFromCoords(Math.Vec3ToVec4(lightCoords, GetEntityHeading(light)), 18.0, 'left')
     local vehicles <const> = Trafficlight:GetVehiclesInRange(pVehicleCoords, 35.0)
-    local frontVehicles <const> = Trafficlight:GetVehiclesInRange(vec3(searchPoint.x, searchPoint.y, searchPoint.z), 20.0)
+    local frontVehicles <const> = Trafficlight:GetVehiclesInRange(Math.Vec4ToVec3(searchPoint), 20.0)
 
     AI:HandleDriveAtGreenLight(pVehicle, pVehicleHeading, pVehicleCoords, intersectionCenter, vehicles)
     AI:HandleDriveAtGreenLight(pVehicle, pVehicleHeading, pVehicleCoords, intersectionCenter, frontVehicles, 180.0)
@@ -87,8 +87,8 @@ function AI:HandleDriveAtGreenLight(pVehicle, pVehicleHeading, pVehicleCoords, i
 
         local aiDriver <const> = GetPedInVehicleSeat(aiVehicle, -1)
         local aiPosition <const> = GetEntityCoords(aiVehicle)
-        local driveDistance <const> = #(vec3(intersectionCenter.x, intersectionCenter.y, intersectionCenter.z) - aiPosition)
-        local targetCoords <const> = Math.GetForwardFromCoords(vec4(aiPosition.x, aiPosition.y, aiPosition.z, aiHeading), driveDistance)
+        local driveDistance <const> = #(Math.Vec4ToVec3(intersectionCenter) - aiPosition)
+        local targetCoords <const> = Math.GetForwardFromCoords(Math.Vec3ToVec4(aiPosition, aiHeading), driveDistance)
 
         if Trusted.Debug then
             SetEntityDrawOutline(aiVehicle, true)
