@@ -12,6 +12,9 @@ print("^6[CLIENT - DEBUG] ^0: "..filename()..".lua gestartet");
 -- Code
 -- ════════════════════════════════════════════════════════════════════════════════════ --
 
+---@class LightSearch
+---@field hash table (to get closest objects)
+---@field hashIndexList table (to check if hash exists - better performance ✨)
 LightSearch = {
     hash = {
         GetHashKey("prop_traffic_01a"),
@@ -64,7 +67,7 @@ function LightSearch:GetRoadCenter(coords, heading)
         lRoadBoundary = Math.GetForwardFromCoords(Math.Vec3ToVec4(rRoadBoundary, heading), 20.0, 'left')
     end
 
-    local center = vec4(
+    local center <const> = vec4(
         (rRoadBoundary.x + lRoadBoundary.x) / 2,
         (rRoadBoundary.y + lRoadBoundary.y) / 2,
         (rRoadBoundary.z + lRoadBoundary.z) / 2,
