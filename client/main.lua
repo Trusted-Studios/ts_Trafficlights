@@ -126,6 +126,8 @@ RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(frontLights, parall
         local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, frontLights[i].hash, false, false, false)
         lights[#lights + 1] = targetLight
 
+        LightHandler:Handle(frontLights[i])
+
         SetEntityTrafficlightOverride(targetLight, 0)
     end
 
@@ -133,6 +135,8 @@ RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(frontLights, parall
         local x, y, z = table.unpack(parallelLights[i].coords)
         local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, parallelLights[i].hash, false, false, false)
         lights[#lights + 1] = targetLight
+
+        LightHandler:Handle(parallelLights[i])
 
         SetEntityTrafficlightOverride(targetLight, 0)
     end
