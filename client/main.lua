@@ -104,7 +104,7 @@ end
 ---@param frontLights CTrafficlight[]
 ---@param parallelLights CTrafficlight[]
 ---@param otherLights CTrafficlight[]
-RegisterNetEvent('Trusted:Trafficlights:SyncChange',function(frontLights, parallelLights, otherLights)
+RegisterNetEvent('Trusted:Trafficlights:SyncChange', function(frontLights, parallelLights, otherLights)
     local lights <const> = {}
 
     for i = 1, #otherLights do

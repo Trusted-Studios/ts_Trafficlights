@@ -49,6 +49,7 @@ function LightHandler:DrawVerticalCircle(coords, radius, red, green, blue, alpha
 end
 
 
+---@todo: improve code, to be more readable
 ---@return table?
 function LightHandler:CalculateLightPosition(light)
     local positions <const> = {
