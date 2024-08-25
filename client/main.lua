@@ -106,6 +106,7 @@ end
 ---@param otherLights CTrafficlight[]
 RegisterNetEvent('Trusted:Trafficlights:SyncChange', function(frontLights, parallelLights, otherLights)
     local lights <const> = {}
+    local duration <const> = 8000
 
     for i = 1, #otherLights do
         CreateThread(function()
@@ -126,9 +127,7 @@ RegisterNetEvent('Trusted:Trafficlights:SyncChange', function(frontLights, paral
         local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, frontLights[i].hash, false, false, false)
         lights[#lights + 1] = targetLight
 
-        LightHandler:Handle(frontLights[i])
-
-        SetEntityTrafficlightOverride(targetLight, 0)
+        LightHandler:Handle(frontLights[i], duration, targetLight)
     end
 
     for i = 1, #parallelLights do
@@ -136,12 +135,10 @@ RegisterNetEvent('Trusted:Trafficlights:SyncChange', function(frontLights, paral
         local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, parallelLights[i].hash, false, false, false)
         lights[#lights + 1] = targetLight
 
-        LightHandler:Handle(parallelLights[i])
-
-        SetEntityTrafficlightOverride(targetLight, 0)
+        LightHandler:Handle(parallelLights[i], duration, targetLight)
     end
 
-    Wait(8000)
+    Wait(duration)
 
     for i = 1, #lights do
         SetEntityTrafficlightOverride(lights[i], -1)

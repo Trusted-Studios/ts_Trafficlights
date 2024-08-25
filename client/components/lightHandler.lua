@@ -310,7 +310,7 @@ function LightHandler:DrawLights(hash, lightCoords)
     return true
 end
 
-function LightHandler:Handle(light)
+function LightHandler:Handle(light, duration, lightEntity)
     local ped <const> = PlayerPedId()
     local draw = true
     CreateThread(function()
@@ -323,9 +323,10 @@ function LightHandler:Handle(light)
         while draw do
             Wait(10)
             local coords = GetEntityCoords(ped)
-            local heading = GetEntityHeading(ped)
 
             if #(coords - light.coords) < 70.0 then
+                Wait(500)
+                SetEntityTrafficlightOverride(lightEntity, 0)
                 goto continue
             end
 
@@ -334,10 +335,7 @@ function LightHandler:Handle(light)
                 goto continue
             end
 
-            if not LightSearch:IsHeadingInRange(light.heading, heading, 90.0) then
-                Wait(500)
-                goto continue
-            end
+            ---@todo: add feature to only draw lights when player is looking at the traffic lights
 
             LightHandler:DrawLights(light.hash, lightCoords)
 
@@ -345,7 +343,7 @@ function LightHandler:Handle(light)
         end
     end)
 
-    SetTimeout(8000, function()
+    SetTimeout(duration, function()
         draw = false
     end)
 end
