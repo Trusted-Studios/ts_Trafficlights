@@ -1,4 +1,5 @@
-![trusted-banner](https://github.com/Trusted-Studios/ts_Trafficlights/assets/79488475/5054a53d-f5b6-41ea-af5f-800dff563aa2)
+![Banner](https://github.com/user-attachments/assets/6c10d6c3-2bf3-43b6-a53a-2b18cb04d6e5)
+
 
 <p align="center">
     <a href="https://discord.gg/hmmM89nCdX">
@@ -17,4 +18,5 @@ This scripts is basically an updated version of the [Smart Trafficlights script]
 - updates in real time for every player on the server
 - optimized to be 0.00ms idle & ~0.06 use (only for like 0.5sec)
 
-![trafficlights](https://github.com/Trusted-Studios/ts_Trafficlights/assets/79488475/60eccf61-8b8e-46ff-8f7b-0740cbe9f071)
+
+![trafficlights-4](https://github.com/user-attachments/assets/a33c58b3-f9d6-4e3e-941f-48a3da89ec85)
