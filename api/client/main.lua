@@ -12,21 +12,23 @@ print("^6[API -> CLIENT - DEBUG] ^0: "..filename()..".lua gestartet");
 -- Code
 -- ════════════════════════════════════════════════════════════════════════════════════ --
 
+repeat Wait(0) until Trafficlight
+
 Trafficlight.API = {}
 
-function Trafficlight.API:SwitchLightStates(intersectionCenter, radius, heading, durarion)
+function Trafficlight.API:SwitchLightStates(intersectionCenter, radius, heading, duration)
     local lights <const> = LightSearch:GetLightsInRange(Math.Vec4ToVec3(intersectionCenter))
 
-    if Trusted.Debug then
+    if true then
         for i = 1, #lights do
             SetEntityDrawOutline(lights[i].entity, true)
         end
     end
 
-    TriggerServerEvent('Trusted:Trafficlight:API:SyncChange', heading, lights, intersectionCenter, radius, durarion)
+    TriggerServerEvent('Trusted:Trafficlight:API:SyncChange', heading, lights, intersectionCenter, radius, duration)
 end
 
-RegisterNetEvent('Trusted:Trafficlight:API:SyncChange', function(frontLights, parallelLights, otherLights, durarion)
+RegisterNetEvent('Trusted:Trafficlight:API:SyncChange', function(frontLights, parallelLights, otherLights, duration)
     local lights <const> = {}
 
     for i = 1, #otherLights do
@@ -48,7 +50,7 @@ RegisterNetEvent('Trusted:Trafficlight:API:SyncChange', function(frontLights, pa
         local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, frontLights[i].hash, false, false, false)
         lights[#lights + 1] = targetLight
 
-        LightHandler:Handle(frontLights[i])
+        LightHandler:Handle(frontLights[i], duration)
 
         SetEntityTrafficlightOverride(targetLight, 0)
     end
@@ -58,19 +60,21 @@ RegisterNetEvent('Trusted:Trafficlight:API:SyncChange', function(frontLights, pa
         local targetLight <const> = GetClosestObjectOfType(x, y, z, 2.0, parallelLights[i].hash, false, false, false)
         lights[#lights + 1] = targetLight
 
-        LightHandler:Handle(parallelLights[i])
+        LightHandler:Handle(parallelLights[i], duration)
 
         SetEntityTrafficlightOverride(targetLight, 0)
     end
 
-    Wait(durarion)
+    Wait(duration)
 
     for i = 1, #lights do
         SetEntityTrafficlightOverride(lights[i], -1)
     end
 end)
 
-RegisterNetEvent('Trusted:Trafficlight:API:SyncAI', function(intersectionCenter, radius, heading, durarion)
+RegisterNetEvent('Trusted:Trafficlight:API:SyncAI', function(intersectionCenter, radius, heading, duration)
+    print(duration)
+
     local aiVehicles <const> = Trafficlight:GetVehiclesInRange(intersectionCenter, radius)
 
     for _, aiVehicle in ipairs(aiVehicles) do
@@ -97,7 +101,7 @@ RegisterNetEvent('Trusted:Trafficlight:API:SyncAI', function(intersectionCenter,
         Wait(1500)
         FreezeEntityPosition(aiVehicle, true)
 
-        SetTimeout(durarion, function()
+        SetTimeout(duration, function()
             FreezeEntityPosition(aiVehicle, false)
         end)
 

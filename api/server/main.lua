@@ -12,12 +12,12 @@ print("^6[API -> SERVER - DEBUG] ^0: "..filename()..".lua gestartet");
 -- Code
 -- ════════════════════════════════════════════════════════════════════════════════════ --
 
-Trafficlight.API = {
+API = {
     usedIntersections = {}
 }
 
-RegisterNetEvent('Trusted:Trafficlight:API:SyncChange', function(heading, lights, intersectionCenter, radius, durarion)
-    Trafficlight.API.usedIntersections[intersectionCenter] = true
+RegisterNetEvent('Trusted:Trafficlight:API:SyncChange', function(heading, lights, intersectionCenter, radius, duration)
+    API.usedIntersections[intersectionCenter] = true
 
     local frontLights <const> = {}
     local parallelLights <const> = {}
@@ -39,6 +39,6 @@ RegisterNetEvent('Trusted:Trafficlight:API:SyncChange', function(heading, lights
         ::continue::
     end
 
-    TriggerClientEvent('Trusted:Trafficlight:API:SyncChange', -1, frontLights, parallelLights, otherLights, durarion)
-    TriggerClientEvent('Trusted:Trafficlight:API:SyncAI', -1, intersectionCenter, radius, heading, durarion)
+    TriggerClientEvent('Trusted:Trafficlight:API:SyncChange', -1, frontLights, parallelLights, otherLights, duration)
+    TriggerClientEvent('Trusted:Trafficlight:API:SyncAI', -1, intersectionCenter, radius, heading, duration)
 end)

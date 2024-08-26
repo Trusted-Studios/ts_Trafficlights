@@ -335,7 +335,14 @@ function LightHandler:Handle(light, duration, lightEntity)
                 goto continue
             end
 
-            ---@todo: add feature to only draw lights when player is looking at the traffic lights
+            local camRot = GetGameplayCamRot(0)
+            local yaw = camRot.z
+            local heading = (yaw % 360 + 360) % 360
+
+            if not LightSearch:IsHeadingInRange(light.heading, heading, 90.0) then
+                Wait(500)
+                goto continue
+            end
 
             LightHandler:DrawLights(light.hash, lightCoords)
 

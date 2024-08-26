@@ -19,8 +19,10 @@ client_scripts {
     'lib/modules/client/Game.lua',
     'client/main.lua',
     'client/components/*.lua',
+    'api/client/main.lua'
 }
 
 server_scripts {
-    'server/main.lua'
+    'server/main.lua',
+    'api/server/main.lua'
 }
