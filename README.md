@@ -15,9 +15,6 @@ This scripts is basically an updated version of the [Smart Trafficlights script]
 - AI will stop / drive at red / green lights
 - Set the waiting time until a light turns green
 - updates in real time for every player on the server
-- optimized to be 0.00ms idle & ~0.03 use (only for like 0.5sec)
-
-## Issues:
-- Lights will only turn green for around 1 second if a player is far away (>80 meters)
+- optimized to be 0.00ms idle & ~0.06 use (only for like 0.5sec)
 
 ![trafficlights](https://github.com/Trusted-Studios/ts_Trafficlights/assets/79488475/60eccf61-8b8e-46ff-8f7b-0740cbe9f071)
